@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+{% load widget_tweaks static %}
+
+{% block style %}
+    <style>
+        .card-header .fa {
+            transition: .3s transform ease-in-out;
+        }
+
+        .card-header .collapsed .fa {
+            transform: rotate(90deg);
+        }
+
+        .card-header {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+
+        <!-- Lesson Detail -->
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Lesson Description</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if object.image %}
+                            <div class="text-center">
+                                <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
+                                     src="{{ object.image.url }}" alt="">
+                            </div>
+                        {% endif %}
+                        <p>{{ object.description }}</p>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Detail</h6>
+                    </div>
+
+                    <div class="card-body">
+                        {% if request.user in object.students.all %}
+                            <form action="" method="post" id="un-enroll-form">
+                                {% csrf_token %}
+                                <div id="enrollment-body"></div>
+                                <button type="submit" class="btn btn-secondary btn-icon-split">
+                                    <span class="icon text-white-50">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </span>
+                                    <span class="text">Un enroll now</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="" method="post" id="enroll-form">
+                                {% csrf_token %}
+                                <div id="enrollment-body">
+                                    {% if enroll_form.enrollment_key.errors %}
+                                        {% for error in enroll_form.enrollment_key.errors %}
+                                            <div class="invalid-feedback">
+                                                <label class="text-danger">{{ error }}</label>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% render_field enroll_form.enrollment_key class+="form-control form-control-user" placeholder="Enrollment key" %}
+                                </div>
+
+                                <div class="my-2"></div>
+                                <button type="submit" class="btn btn-light btn-icon-split">
+                                    <span class="icon text-gray-600">
+                                        <i class="fas fa-arrow-right"></i>
+                                    </span>
+                                    <span class="text">Enroll now</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">About Supervisor</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-lg-6 col-xs-12 col-sm-12 text-center">
+                                <img class="img-profile rounded-circle"
+                                     style="height: 100%; width: 100%; display: block;"
+                                     src="{% if object.owner.avatar %}{{ object.owner.avatar.url }}{% else %}{% static 'img/avatardefault_92824.png' %}{% endif %}">
+                            </div>
+                            <div class="col-lg-6 col-sm-12 col-md-12">
+                                {% if object.owner.full_name %}
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Name and Surname
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ object.owner.full_name }}
+                                    </div>
+                                {% endif %}
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Email
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ object.owner.email }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+
+{% block scripts %}
+{#    <script>#}
+{#        $(document).ready(() => {#}
+{#            $('#enroll-form').on('submit', function (e) {#}
+{#                e.preventDefault();#}
+{##}
+{#                let additional_form = $('#enrollment-body');#}
+{#                let token = '{{ csrf_token }}';#}
+{#                let course = '{{ object.pk }}';#}
+{#                let enrollment_key = $('#id_enrollment_key').val();#}
+{##}
+{#                let data = {#}
+{#                    'course': course,#}
+{#                    'enrollment_key': enrollment_key,#}
+{#                };#}
+{##}
+{#                $.ajax({#}
+{#                    type: "POST",#}
+{#                    headers: {"X-CSRFToken": token},#}
+{#                    url: "{% url 'enroll_to_course' %}",#}
+{#                    data: data,#}
+{##}
+{#                    success: function (response) {#}
+{#                        if (!response.success) {#}
+{#                            additional_form.children().remove();#}
+{#                            additional_form.append(response.form)#}
+{#                        } else if (response.success) {#}
+{#                            window.location.replace("{% url 'student_course_detail' object.pk %}");#}
+{#                        }#}
+{#                    },#}
+{#                    error: function (request, errThrown, errObject) {#}
+{#                        console.error(request, errThrown, errObject);#}
+{#                    }#}
+{#                })#}
+{#            })#}
+{#        });#}
+{#    </script>#}
+
+    <script>
+        $(document).ready(() => {
+            function enrollCourse() {
+                $('#enroll-form').on('submit', function (e) {
+                e.preventDefault();
+
+                let additional_form = $('#enrollment-body');
+                let token = '{{ csrf_token }}';
+                let course = '{{ object.pk }}';
+                let enrollment_key = $('#id_enrollment_key').val();
+
+                let data = {
+                    'course': course,
+                    'enrollment_key': enrollment_key,
+                };
+
+                $.ajax({
+                    type: "POST",
+                    headers: {"X-CSRFToken": token},
+                    url: "{% url 'enroll_to_course' %}",
+                    data: data,
+
+                    success: function (response) {
+                        if (!response.success) {
+                            console.log(response);
+                            additional_form.children().remove();
+                            additional_form.append(response.form)
+                        } else if (response.success) {
+                            window.location.replace("{% url 'student_course_detail' object.pk %}");
+                        }
+                    },
+                    error: function (request, errThrown, errObject) {
+                        console.error(request, errThrown, errObject);
+                    }
+                })
+            })
+            }
+
+            function unEnrollCourse() {
+                $('#un-enroll-form').on('submit', function (e) {
+                    e.preventDefault();
+
+                    let additional_form = $('#enrollment-body');
+                    let token = '{{ csrf_token }}';
+                    let course = '{{ object.pk }}';
+
+                    let data = {
+                        'course': course,
+                    };
+
+                    $.ajax({
+                        type: "POST",
+                        headers: {"X-CSRFToken": token},
+                        url: "{% url 'un_enroll_from_course' %}",
+                        data: data,
+
+                        success: function (response) {
+                            if (!response.success) {
+                                console.log(response.success)
+                            } else if (response.success) {
+                                location.reload();
+                            }
+                        },
+                        error: function (request, errThrown, errObject) {
+                            console.error(request, errThrown, errObject);
+                        }
+                    })
+                })
+            }
+
+            enrollCourse();
+            unEnrollCourse();
+        });
+
+    </script>
+
+    <script>
+        $('.panel-collapse').on('show.bs.collapse', function () {
+            $(this).siblings('.panel-heading').addClass('active');
+        });
+
+        $('.panel-collapse').on('hide.bs.collapse', function () {
+            $(this).siblings('.panel-heading').removeClass('active');
+        });
+    </script>
+{% endblock %}

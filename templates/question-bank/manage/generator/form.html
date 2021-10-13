@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Question Bank Generator</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card shadow mb-4">
+
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            Generate questions for {{ object.title }}
+                        </h6>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form action="{% url 'generate_question' object.pk %}" method="post" id="generate-question-form" enctype='multipart/form-data'>
+                            {{ form|crispy }}
+                            {% csrf_token %}
+                            <input type="submit" value="Save" class="btn btn-primary" style="width: 100%">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function generateQuestions() {
+            $('#generate-question-form').submit(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    data: $(this).serialize(),
+                    type: $(this).attr('method'),
+                    url: $(this).attr('action'),
+                    success: function(response) {
+                         console.log(response);
+                         if(response['success']) {
+                             alert('Question bank successfully generated!');
+                             window.location.replace('{% url 'question_bank_manager' object.pk %}')
+                         }
+                         if(response['error']) {
+                             alert(response['error']);
+                             $(this).empty();
+                             $(this).html(response['form']);
+                         }
+                    },
+                    error: function (request, status, error) {
+                         console.error(request, status, error);
+                    }
+                });
+
+            })
+        }
+        generateQuestions()
+
+    </script>
+{% endblock %}

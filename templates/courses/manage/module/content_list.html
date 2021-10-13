@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load course static %}
+
+
+{% block style %}
+    <style>
+        .card-header .fa {
+            transition: .3s transform ease-in-out;
+        }
+
+        .card-header .collapsed .fa {
+            transform: rotate(90deg);
+        }
+
+        .card-header {
+            cursor: pointer;
+        }
+
+
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% with course=module.course %}
+        <div class="container-fluid">
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Course "{{ course.title }}"</h1>
+            </div>
+
+            <!-- Lesson Detail -->
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Course Description</h6>
+                        </div>
+                        <div class="card-body">
+                            {% if course.image %}
+                                <div class="text-center">
+                                    <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
+                                         src="{{ course.image.url }}" alt="">
+                                </div>
+                            {% endif %}
+                            <p>{{ course.description }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">About Supervisor</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+
+                                <div class="col-lg-6 col-xs-12 col-sm-12 text-center">
+                                    <img class="img-profile rounded-circle"
+                                         style="height: 100%; width: 100%; display: block;"
+                                         src="
+
+                                                 {% if course.owner.avatar %}{{ course.owner.avatar.url }}{% else %}{% static 'img/avatardefault_92824.png' %}{% endif %}">
+                                </div>
+                                <div class="col-lg-6 col-sm-12 col-md-12">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Name and Surname
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ course.owner.full_name }}
+                                    </div>
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Email
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        {{ course.owner.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Detail</h6>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-4 contents">
+                                    <h3>Modules</h3>
+                                    <ul id="modules">
+                                        {% for m in course.module.all %}
+                                            <li data-id="{{ m.id }}" {% if m == module %}class="selected"{% endif %}>
+                                                <a href="{% url "module_content_list" m.id %}">
+                                                  <span>
+                                                    Module <span class="order">{{ m.order|add:1 }}</span>
+                                                  </span>
+                                                    <br>
+                                                    {{ m.title }}
+                                                </a>
+                                            </li>
+                                        {% empty %}
+                                            <li>No modules yet.</li>
+                                        {% endfor %}
+                                    </ul>
+                                    <p><a href="{% url "course_module_update" course.id %}">Edit modules</a></p>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="module">
+                                        <h3>Module {{ module.order|add:1 }}: {{ module.title }}</h3>
+                                        <h4>Module contents:</h4>
+
+                                        <div id="module-contents">
+                                            {% for content in module.contents.all %}
+                                                <div data-id="{{ content.id }}" class="row m-1">
+                                                    {% with item=content.item %}
+                                                        <p class="mr-1">{{ item }} ({{ item|model_name }})</p>
+                                                        <a href="{% url "module_content_update" module.id item|model_name item.id %}"
+                                                           class="mr-1">Edit</a>
+
+                                                        {% if item|model_name == 'quiz' %}
+                                                            |  <a href="" class="mr-1">Create question</a>
+                                                            |
+                                                            <a href="{% url 'question_list_manager' slug=item.slug %}"
+                                                               class="mr-1">Questions</a>
+                                                        {% endif %}
+
+                                                        <form action="{% url "module_content_delete" content.id %}"
+                                                              method="post">
+                                                            <input type="submit" value="Delete" class="mr-1">
+                                                            {% csrf_token %}
+                                                        </form>
+                                                    {% endwith %}
+                                                </div>
+                                            {% empty %}
+                                                <p>This module has no contents yet.</p>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <hr>
+                                    .
+                                    <h5>Add new content:</h5>
+                                    <ul class="content-types">
+                                        <li><a href="{% url "module_content_create" module.id "text" %}">Text</a></li>
+                                        <li><a href="{% url "module_content_create" module.id "image" %}">Image</a></li>
+                                        <li><a href="{% url "module_content_create" module.id "video" %}">Video</a></li>
+                                        <li><a href="{% url "module_content_create" module.id "file" %}">File</a></li>
+                                        <li><a href="{% url "module_content_create" module.id "quiz" %}">Quiz</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endwith %}
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        $('.panel-collapse').on('show.bs.collapse', function () {
+            $(this).siblings('.panel-heading').addClass('active');
+        });
+
+        $('.panel-collapse').on('hide.bs.collapse', function () {
+            $(this).siblings('.panel-heading').removeClass('active');
+        });
+
+        $('#modules').sortable({
+            stop: function (event, ui) {
+                modules_order = {};
+                $('#modules').children().each(function () {
+                    // update the order field
+                    $(this).find('.order').text($(this).index() + 1);
+                    // associate the module's id with its order
+                    modules_order[$(this).data('id')] = $(this).index();
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "module_order" %}',
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    data: JSON.stringify(modules_order)
+                });
+            }
+        });
+
+        $('#module-contents').sortable({
+            stop: function (event, ui) {
+                contents_order = {};
+                $('#module-contents').children().each(function () {
+                    // associate the module's id with its order
+                    contents_order[$(this).data('id')] = $(this).index();
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "content_order" %}',
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    data: JSON.stringify(contents_order),
+                });
+            }
+        });
+    </script>
+
+{% endblock %}

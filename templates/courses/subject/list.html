@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block style %}
+    <style>
+
+        a {
+            text-decoration: none;
+        }
+
+        ul.tree, .tree li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .tree ul {
+            display: none;
+        }
+
+        .tree ul {
+            margin-left: 40px;
+            padding: 0;
+            border-top: 1px solid #4e73df;
+
+        }
+        .tree > li {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .tree span {
+            display: block;
+            padding: 10px 12px;
+
+        }
+
+        .icon {
+            display: inline-block;
+        }
+
+        .tree .hasChildren > .expanded {
+        }
+
+        .tree .hasChildren > .expanded a {
+            color: #4e73df;
+        }
+
+        .icon:before {
+            content: "+";
+            display: inline-block;
+            min-width: 20px;
+            text-align: center;
+            color: #4e73df;
+        }
+
+        .tree .expanded .icon:before {
+            content: "-";
+        }
+
+        .show-effect {
+            display: block !important;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Subject List</h1>
+        </div>
+        {% include 'courses/subject/componets/subjects.html' %}
+
+    </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $('.tree .icon').click(function () {
+            $(this).parent().toggleClass('expanded').closest('li').find('ul:first').toggleClass('show-effect');
+        });
+    </script>
+{% endblock %}

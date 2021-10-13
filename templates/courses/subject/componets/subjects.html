@@ -1,0 +1,30 @@
+{% load mptt_tags %}
+
+<div class="row">
+    <div class="col-xl-12 col-lg-12">
+        <div class="card shadow mb-4">
+
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Subjects</h6>
+            </div>
+
+            <div class="card-body ">
+                <ul class="tree">
+                    {% recursetree object_list %}
+                        <li class="tree__item hasChildren">
+                            <span>
+                                {% if not node.is_leaf_node %}<div class="icon"></div>{% endif %}
+                                <a href="{{ node.get_absolute_url }}">{{ node.title }}</a>
+                            </span>
+                            {% if not node.is_leaf_node %}
+                                <ul class="children">
+                                    {{ children }}
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endrecursetree %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

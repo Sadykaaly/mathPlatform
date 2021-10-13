@@ -1,0 +1,58 @@
+<div class="card shadow mb-4">
+
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 font-weight-bold text-primary">Courses</h6>
+        <div class="dropdown no-arrow">
+            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                <a class="dropdown-item" href="{% url 'course_create' %}">Create course</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            {% for course in object_list %}
+            {% with subject=course.subject %}
+                <div class="col-md-6">
+                    <div class="shadow mb-4 m-2 lesson-card">
+                        {% if course.image %}
+                            <a href="{{ course.get_absolute_url }}">
+                                <img class="card-img-top"
+                                     data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail"
+                                     alt="Thumbnail [100%x225]" style="height: 225px; width: 100%; display: block;"
+                                     src="{{ course.image.url }}" data-holder-rendered="true">
+                            </a>
+                        {% endif %}
+                        <div class="card-body" >
+                            <h5 style="color: #2e59d9">{{ course.title }}</h5>
+                            <p class="card-text" style="height: 60px;">{{ course.description|slice:":100" }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url "course_edit" course.id %}">Edit</a>
+                                <a href="{% url "course_delete" course.id %}">Delete</a>
+                                <a href="{% url "course_module_update" course.id %}">Edit modules</a>
+                                {% if course.module.count > 0 %}
+                                    <a href="{% url "module_content_list" course.module.first.id %}">Manage contents</a>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center ">
+                                <div class="btn-group">
+                                    <a href="{{ course.get_absolute_url }}"
+                                       class="btn btn-sm btn-outline-primary">View</a>
+                                </div>
+                                <small class="text-muted">{{ course.created_at }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endwith %}
+        {% empty %}
+            <p>You haven't created any courses yet.</p>
+        {% endfor %}
+        </div>
+
+    </div>
+</div>

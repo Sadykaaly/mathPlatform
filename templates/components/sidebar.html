@@ -1,0 +1,97 @@
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'student_main_page' %}">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">MathPlat<sup>2</sup></div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+
+    <!-- Nav Item - Home Page -->
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'student_main_page' %}">
+            <i class="fas fa-home"></i>
+            <span>Home Page</span></a>
+    </li>
+
+    <li class="nav-item active">
+        <a class="nav-link" href="{% url 'subject_list' %}">
+            <i class="fas fa-sticky-note"></i>
+            <span>Subjects</span></a>
+    </li>
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    {% if request.user.is_instructor %}
+        <div class="sidebar-heading">
+            Manage
+        </div>
+
+        <!-- Nav Item - Manages Collapse Menu -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCpourses"
+               aria-expanded="true"
+               aria-controls="collapseCpourses">
+                <span>Courses</span>
+            </a>
+            <div id="collapseCpourses" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="{% url 'manage_course_list' %}">My courses</a>
+                    <a class="collapse-item" href="{% url 'course_create' %}">Create Course</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProgress"
+               aria-expanded="true"
+               aria-controls="collapseProgress">
+                <span>Progress</span>
+            </a>
+            <div id="collapseProgress" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="{% url 'quiz_progress' %}">Progress</a>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseMarking"
+               aria-expanded="true"
+               aria-controls="collapseMarking">
+                <span>Marking</span>
+            </a>
+            <div id="collapseMarking" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="{% url 'quiz_marking' %}">Marking</a>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseQuestionBank"
+               aria-expanded="true"
+               aria-controls="collapseQuestionBank">
+                <span>Question bank</span>
+            </a>
+            <div id="collapseQuestionBank" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <a class="collapse-item" href="{% url 'question_bank_mine' %}">Question bank</a>
+                    <a class="collapse-item" href="{% url 'question_bank_create' %}">Create Question bank</a>
+                </div>
+            </div>
+        </li>
+    {% endif %}
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>
+<!-- End of Sidebar -->

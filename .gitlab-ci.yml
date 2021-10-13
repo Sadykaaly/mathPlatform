@@ -1,0 +1,92 @@
+image: docker:latest
+services:
+  - docker:dind
+
+stages:
+  - test
+  - package
+  - deploy
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: mrcrendel/mathplat
+
+before_script:
+  - export IMAGE_TAG=${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA:0:8}
+
+###########################
+#         Testing         #
+###########################
+
+test:
+  stage: test
+  image: python:3.7.4
+  script:
+    - pip install -r requirements/base.txt
+    - python manage.py migrate
+    - python manage.py test
+  only:
+    - merge_request
+    - dev
+    - master
+
+############################
+#        Packaging         #
+############################
+
+package-docker:
+  stage: package
+  script:
+    - docker login $REGISTRY_URL -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -t $REGISTRY_URL/${IMAGE_NAME}:${IMAGE_TAG} .
+    - docker push $REGISTRY_URL/${IMAGE_NAME}:${IMAGE_TAG}
+  only:
+    - dev
+
+###########################
+#       Deployment        #
+###########################
+
+.prepare-key-script: &prepare_key |
+  apk add --no-cache openssh-client
+  eval $(ssh-agent -s)
+  echo "$DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  mkdir -p ~/.ssh
+  chmod 700 ~/.ssh
+  ssh-keyscan $DEPLOY_HOST >> ~/.ssh/known_hosts
+  chmod 644 ~/.ssh/known_hosts
+
+.deploy-to-host-script: &deploy_to_host |
+  ssh ${DEPLOY_USER}@${DEPLOY_HOST} "docker login $REGISTRY_URL -u $DOCKER_USER -p $DOCKER_PASS"
+  ssh ${DEPLOY_USER}@${DEPLOY_HOST} "docker pull $REGISTRY_URL/${IMAGE_NAME}:${IMAGE_TAG}"
+  ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+      docker stop ${CONTAINER_APP} && \
+      IMG=\$(docker ps -a --filter='name=^/${CONTAINER_APP}$' --format='{{.Image}}') &&  \
+      docker rm -f ${CONTAINER_APP} && \
+      docker rmi \$IMG; \
+      exit 0
+  "
+  ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+      docker run --detach --name=${CONTAINER_APP} --restart=always \
+                 --volume /app/static:/app/static \
+                 --volume /app/media:/app/media \
+                 --net sortd-lan -p ${CONTAINER_EXT_PORT}:8000 \
+                 -e "SECRET_KEY=${SECRET_KEY}" \
+                 $REGISTRY_URL/${IMAGE_NAME}:${IMAGE_TAG} gunicorn -b :8000 sortd.wsgi
+  " Error loading key "(stdin)": invalid format
+ ERROR: Job failed: exit code 1
+
+deploy-dev:
+  stage: deploy
+  variables:
+    DEPLOY_KEY: $DEPLOY_KEY
+    DEPLOY_USER: root
+    DEPLOY_HOST: $DEPLOY_HOST
+    CONTAINER_EXT_PORT: 8000
+    SECRET_KEY: $SECRET_KEY
+  script:
+    - *prepare_key
+    - *deploy_to_host
+  only:
+    - dev

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load course %}
+
+
+{% block style %}
+    <style>
+        .card-header .fa {
+            transition: .3s transform ease-in-out;
+        }
+
+        .card-header .collapsed .fa {
+            transform: rotate(90deg);
+        }
+
+        .card-header {
+            cursor: pointer;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% with course=module.course %}
+        <div class="container-fluid">
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">Quiz "{{ quiz.title }}"</h1>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Question List</h6>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div id="module-contents">
+                                        {% for content in quiz.content.all %}
+                                            {% with item=content.item %}
+                                                <p class="mr-1">{{ item }} ({{ item|model_name }})</p>
+                                                <a href="{% url 'quiz_content_update' quiz.slug item|model_name item.pk %}"
+                                                   class="mr-1">Edit</a>
+
+                                                {% if item|model_name == 'quiz' %}
+                                                    | <a href="" class="mr-1">Create question</a>
+                                                    | <a href="" class="mr-1">Questions</a>
+                                                {% endif %}
+
+                                                <form action="{% url 'quiz_content_delete' content.pk %}"
+                                                      method="post">
+                                                    <input type="submit" value="Delete" class="mr-1">
+                                                    {% csrf_token %}
+                                                </form>
+                                            {% endwith %}
+                                        {% empty %}
+                                            <p>This quiz has no questions yet.</p>
+                                        {% endfor %}
+                                    </div>
+                                    <hr>
+                                    <h3>Add new question:</h3>
+                                    <ul class="content-types">
+                                        <li>
+                                            <a href="{% url "quiz_content_create" quiz.slug "mcquestion" %}">Multiple
+                                            Choice</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url "quiz_content_create" quiz.slug "essayquestion" %}">Essay</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url "quiz_content_create" quiz.slug "tfquestion" %}">True False</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endwith %}
+{% endblock %}

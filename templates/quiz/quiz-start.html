@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">{{ quiz.title }}</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <!-- Content Column -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Question</h6>
+                        </div>
+                        <p>{{ quiz.description }}</p>
+                        <p>
+                            <a href="{% url 'quiz_start' slug=quiz.slug question_index=0 %}">
+                                {% trans "Start quiz" %}
+                            </a>
+                            {% if is_sitting_exists %}
+                                <a href="{% url 'quiz_results' slug=quiz.slug %}">
+                                    {% trans "Look result of last attempt" %}
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

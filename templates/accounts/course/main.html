@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h1 class="h3 mb-0 text-gray-800">Home page</h1>
+        </div>
+
+        {% include 'index/exam-list.html' %}
+        {% include 'accounts/includes/courses.html' %}
+
+{#        <div class="row">#}
+{#            <!-- Area Chart -->#}
+{#            {% include 'index/charts/area-chart.html' %}#}
+{##}
+{#            <!-- Pie Chart -->#}
+{#            {% include 'index/charts/pie-chart.html' %}#}
+{#        </div>#}
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function shadowOnHover(item) {
+            item.hover(
+                function() {
+                    $(this).addClass('shadow-lg').css('cursor', 'pointer');
+                },
+                function() {
+                    $(this).removeClass('shadow-lg');
+                }
+            );
+        }
+
+        $(document).ready(function() {
+            shadowOnHover($('.lesson-card'))
+        });
+    </script>
+{% endblock %}
